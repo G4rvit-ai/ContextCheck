@@ -1,0 +1,17 @@
+__pycache__/
+.pytest_cache/
+.DS_Store
+.venv/
+venv/
+*.py[cod]
+
+# Downloaded datasets and Hugging Face caches
+data/
+.cache/
+hf_cache/
+
+# Trained model weights and generated metrics
+models/*
+!models/.gitkeep
+artifacts/*
+!artifacts/.gitkeep
