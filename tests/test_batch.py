@@ -38,3 +38,13 @@ def test_batch_predicts_valid_rows_and_marks_invalid_rows():
 def test_batch_requires_both_text_columns():
     with pytest.raises(ValueError, match="premise"):
         batch_predict_dataframe(pd.DataFrame({"premise": ["text"]}), FakePredictor())
+
+
+def test_batch_rejects_incomplete_predictor_output():
+    class IncompletePredictor:
+        def predict_many(self, pairs):
+            return []
+
+    frame = pd.DataFrame({"premise": ["text"], "hypothesis": ["statement"]})
+    with pytest.raises(RuntimeError, match="unexpected number"):
+        batch_predict_dataframe(frame, IncompletePredictor())

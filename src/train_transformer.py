@@ -26,14 +26,32 @@ from src.preprocessing import select_train_subset, tokenize_pairs
 MODEL_NAME = "distilbert/distilbert-base-uncased"
 
 
+def positive_int(value: str) -> int:
+    """Parse a positive integer CLI option."""
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("value must be positive")
+    return parsed
+
+
+def positive_float(value: str) -> float:
+    """Parse a positive floating-point CLI option."""
+    parsed = float(value)
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("value must be greater than zero")
+    return parsed
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--max-train-samples", type=int, default=None)
-    parser.add_argument("--epochs", type=float, default=2)
-    parser.add_argument("--batch-size", type=int, default=8)
-    parser.add_argument("--gradient-accumulation-steps", type=int, default=2)
-    parser.add_argument("--max-length", type=int, default=128)
-    parser.add_argument("--learning-rate", type=float, default=2e-5)
+    parser.add_argument("--max-train-samples", type=positive_int, default=None)
+    parser.add_argument("--epochs", type=positive_float, default=2)
+    parser.add_argument("--batch-size", type=positive_int, default=8)
+    parser.add_argument(
+        "--gradient-accumulation-steps", type=positive_int, default=2
+    )
+    parser.add_argument("--max-length", type=positive_int, default=128)
+    parser.add_argument("--learning-rate", type=positive_float, default=2e-5)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output-dir", type=Path, default=Path("models/contextcheck_distilbert"))
     parser.add_argument(

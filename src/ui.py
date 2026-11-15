@@ -7,7 +7,7 @@ from pathlib import Path
 
 import streamlit as st
 
-from src.utils import MODEL_DIR, RESULTS_PATH
+from src.utils import MODEL_DIR, RESULTS_PATH, is_model_ready
 
 
 LABEL_META = {
@@ -99,7 +99,7 @@ def render_sidebar() -> None:
         st.markdown("## 🧭 ContextCheck")
         st.caption("Transformer-based natural language inference")
         st.divider()
-        if MODEL_DIR.is_dir():
+        if is_model_ready():
             st.markdown('<span class="status-pill">● Model ready</span>', unsafe_allow_html=True)
         else:
             st.markdown('<span class="status-pill">○ Training required</span>', unsafe_allow_html=True)
@@ -122,9 +122,19 @@ def load_saved_results() -> dict:
     if not RESULTS_PATH.is_file():
         return {}
     try:
-        return json.loads(RESULTS_PATH.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return {}
+        results = json.loads(RESULTS_PATH.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise RuntimeError(f"Could not read evaluation results at {RESULTS_PATH}.") from exc
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            f"Evaluation results at {RESULTS_PATH} are not valid JSON. "
+            "Regenerate them by rerunning evaluation."
+        ) from exc
+    if not isinstance(results, dict):
+        raise RuntimeError(
+            f"Evaluation results at {RESULTS_PATH} must contain a JSON object."
+        )
+    return results
 
 
 def render_label_result(label: str, score: float) -> None:

@@ -11,6 +11,25 @@ MODEL_DIR = PROJECT_ROOT / "models" / "contextcheck_distilbert"
 RESULTS_PATH = PROJECT_ROOT / "artifacts" / "evaluation_results.json"
 
 
+def is_model_ready(model_dir: str | Path = MODEL_DIR) -> bool:
+    """Return whether a directory contains the minimum saved-model artifacts."""
+    model_path = Path(model_dir)
+    if not model_path.is_dir():
+        return False
+    has_weights = (model_path / "pytorch_model.bin").is_file() or any(
+        model_path.glob("*.safetensors")
+    )
+    has_tokenizer = (model_path / "tokenizer.json").is_file() or (
+        (model_path / "vocab.txt").is_file()
+        and (model_path / "tokenizer_config.json").is_file()
+    )
+    return (
+        (model_path / "config.json").is_file()
+        and has_weights
+        and has_tokenizer
+    )
+
+
 def batch_predict_dataframe(dataframe: pd.DataFrame, predictor) -> pd.DataFrame:
     """Predict valid CSV rows and mark invalid records without stopping the batch."""
     required = {"premise", "hypothesis"}
@@ -42,7 +61,15 @@ def batch_predict_dataframe(dataframe: pd.DataFrame, predictor) -> pd.DataFrame:
     result["status"] = status
 
     predictions = predictor.predict_many(valid_pairs)
+    if len(predictions) != len(valid_pairs):
+        raise RuntimeError(
+            "The predictor returned an unexpected number of results "
+            f"({len(predictions)} for {len(valid_pairs)} valid rows)."
+        )
     for position, prediction in zip(valid_positions, predictions):
+        required_prediction_keys = {"label", "score", "scores"}
+        if not required_prediction_keys.issubset(prediction):
+            raise RuntimeError("The predictor returned an incomplete prediction result.")
         result.iloc[position, result.columns.get_loc("predicted_label")] = prediction["label"]
         result.iloc[position, result.columns.get_loc("model_score")] = prediction["score"]
         for label, score in prediction["scores"].items():

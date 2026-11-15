@@ -16,6 +16,14 @@ from src.evaluation import compute_classification_results, save_results
 from src.preprocessing import select_train_subset
 
 
+def positive_int(value: str) -> int:
+    """Parse a positive integer CLI option."""
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("value must be positive")
+    return parsed
+
+
 def make_pair_features(premises, hypotheses, vectorizer, fit: bool):
     """Represent premise, hypothesis, and their sparse TF-IDF difference."""
     if fit:
@@ -30,7 +38,7 @@ def make_pair_features(premises, hypotheses, vectorizer, fit: bool):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--max-train-samples", type=int, default=None)
+    parser.add_argument("--max-train-samples", type=positive_int, default=None)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output-dir", type=Path, default=Path("models/baseline"))
     parser.add_argument(

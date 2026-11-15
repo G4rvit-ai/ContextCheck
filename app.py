@@ -3,7 +3,7 @@
 import streamlit as st
 
 from src.ui import inject_styles, load_saved_results, render_hero, render_sidebar
-from src.utils import MODEL_DIR
+from src.utils import is_model_ready
 
 st.set_page_config(
     page_title="ContextCheck | Natural Language Inference",
@@ -24,12 +24,16 @@ st.info(
     "internet or verify whether a statement is universally true."
 )
 
-results = load_saved_results()
+try:
+    results = load_saved_results()
+except RuntimeError as error:
+    st.error(str(error))
+    results = {}
 transformer = results.get("transformer")
 status_col, metric_col, guide_col = st.columns(3)
 with status_col:
     st.markdown('<div class="card"><h3>Model status</h3>', unsafe_allow_html=True)
-    if MODEL_DIR.is_dir():
+    if is_model_ready():
         st.success("Fine-tuned model available")
         st.write("The analysis workspace is ready for live predictions.")
     else:
