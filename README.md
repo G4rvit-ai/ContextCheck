@@ -168,6 +168,16 @@ inference reports the command needed to train them.
 
 Try `sample_batch.csv` for a batch example.
 
+### Dashboard features
+
+The dashboard includes a branded home page with model-readiness status and an
+auditable four-step workflow, single-pair analysis with sample prompts and
+uncertainty guidance, CSV template download, batch prediction distribution
+charts, invalid-row reporting, confusion-matrix evaluation, and measured
+Transformer-versus-baseline comparison. These presentation features do not
+replace model training: live predictions still require the saved fine-tuned
+model directory.
+
 ## Evaluation metrics
 
 The evaluation report records accuracy, macro precision, macro recall, macro

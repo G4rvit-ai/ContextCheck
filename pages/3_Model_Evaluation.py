@@ -7,9 +7,12 @@ import plotly.express as px
 import streamlit as st
 
 from src.labels import LABEL_NAMES
+from src.ui import inject_styles, render_sidebar
 from src.utils import RESULTS_PATH
 
 st.set_page_config(page_title="Model Evaluation | ContextCheck", page_icon="📊", layout="wide")
+inject_styles()
+render_sidebar()
 st.title("Transformer Model Evaluation")
 
 if not RESULTS_PATH.is_file():

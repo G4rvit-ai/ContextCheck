@@ -6,9 +6,12 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from src.ui import inject_styles, render_sidebar
 from src.utils import RESULTS_PATH
 
 st.set_page_config(page_title="Model Comparison | ContextCheck", page_icon="⚖️", layout="wide")
+inject_styles()
+render_sidebar()
 st.title("Model Comparison")
 
 if not RESULTS_PATH.is_file():
