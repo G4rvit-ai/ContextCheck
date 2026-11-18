@@ -149,6 +149,12 @@ number of training examples. Do not tune hyperparameters against test results.
 
 The training scripts download the dataset and the pretrained model on first
 use. Plan for substantial disk, network, RAM, and GPU usage for full training.
+The notebook invokes the active Colab `python` executable from PATH so the
+training subprocess uses the same installed packages as the notebook kernel.
+
+Colab note: after changing the runtime or installing dependencies for the first
+time, restart the runtime if Colab reports a NumPy binary incompatibility.
+Then rerun the dependency cell and continue from the import verification cell.
 
 ## Run the application
 
