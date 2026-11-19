@@ -60,19 +60,23 @@ def batch_predict_dataframe(dataframe: pd.DataFrame, predictor) -> pd.DataFrame:
         result[f"score_{label}"] = float("nan")
     result["status"] = status
 
-    predictions = predictor.predict_many(valid_pairs)
-    if len(predictions) != len(valid_pairs):
-        raise RuntimeError(
-            "The predictor returned an unexpected number of results "
-            f"({len(predictions)} for {len(valid_pairs)} valid rows)."
-        )
-    for position, prediction in zip(valid_positions, predictions):
-        required_prediction_keys = {"label", "score", "scores"}
-        if not required_prediction_keys.issubset(prediction):
-            raise RuntimeError("The predictor returned an incomplete prediction result.")
-        result.iloc[position, result.columns.get_loc("predicted_label")] = prediction["label"]
-        result.iloc[position, result.columns.get_loc("model_score")] = prediction["score"]
-        for label, score in prediction["scores"].items():
-            result.iloc[position, result.columns.get_loc(f"score_{label}")] = score
-        result.iloc[position, result.columns.get_loc("status")] = "ok"
+    if valid_pairs:
+        predictions = predictor.predict_many(valid_pairs)
+        if len(predictions) != len(valid_pairs):
+            raise RuntimeError(
+                "The predictor returned an unexpected number of results "
+                f"({len(predictions)} for {len(valid_pairs)} valid rows)."
+            )
+        expected_scores = {"entailment", "neutral", "contradiction"}
+        for position, prediction in zip(valid_positions, predictions):
+            required_prediction_keys = {"label", "score", "scores"}
+            if not required_prediction_keys.issubset(prediction):
+                raise RuntimeError("The predictor returned an incomplete prediction result.")
+            if set(prediction["scores"]) != expected_scores:
+                raise RuntimeError("The predictor returned an invalid score mapping.")
+            result.iloc[position, result.columns.get_loc("predicted_label")] = prediction["label"]
+            result.iloc[position, result.columns.get_loc("model_score")] = prediction["score"]
+            for label, score in prediction["scores"].items():
+                result.iloc[position, result.columns.get_loc(f"score_{label}")] = score
+            result.iloc[position, result.columns.get_loc("status")] = "ok"
     return result

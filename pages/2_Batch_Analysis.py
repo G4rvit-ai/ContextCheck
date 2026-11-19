@@ -85,5 +85,10 @@ if uploaded is not None:
                 )
         except FileNotFoundError as error:
             st.error(str(error))
-        except (ValueError, UnicodeDecodeError, pd.errors.ParserError) as error:
+        except (
+            ValueError,
+            UnicodeDecodeError,
+            pd.errors.EmptyDataError,
+            pd.errors.ParserError,
+        ) as error:
             st.error(f"Could not process this CSV: {error}")

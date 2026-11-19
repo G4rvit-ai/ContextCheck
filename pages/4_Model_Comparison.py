@@ -1,12 +1,10 @@
 """Compare measured Transformer and TF-IDF baseline metrics."""
 
-import json
-
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from src.ui import inject_styles, render_sidebar
+from src.ui import inject_styles, load_saved_results, render_sidebar
 from src.utils import RESULTS_PATH
 
 st.set_page_config(page_title="Model Comparison | ContextCheck", page_icon="⚖️", layout="wide")
@@ -21,7 +19,11 @@ if not RESULTS_PATH.is_file():
     )
     st.stop()
 
-results = json.loads(RESULTS_PATH.read_text(encoding="utf-8"))
+try:
+    results = load_saved_results()
+except RuntimeError as error:
+    st.error(str(error))
+    st.stop()
 available = {
     "DistilBERT": results.get("transformer"),
     "TF-IDF + Logistic Regression": results.get("baseline"),

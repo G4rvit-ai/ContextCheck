@@ -5,10 +5,8 @@ a **premise** and a **hypothesis**, it predicts whether the premise entails,
 contradicts, or is neutral toward the hypothesis. It compares only the supplied
 texts; it does not search the web or verify claims against external facts.
 
-> **Model artifacts are not included.** The source code and training pipelines
-> are complete, but no model has been trained in this workspace. The evaluation
-> pages therefore remain empty until you run training. No performance numbers
-> are claimed or fabricated.
+> **Model artifacts are not included in Git.** GitHub clones need a separately
+> downloaded model bundle or a local training run before live inference works.
 
 ## Objectives
 
@@ -145,12 +143,15 @@ number of training examples. Do not tune hyperparameters against test results.
 4. Choose `TRAIN_LIMIT = 20000` for a deterministic pilot, or `None` for all
    valid training examples. The notebook runs the baseline and then
    fine-tunes/evaluates DistilBERT.
-5. Optionally mount Drive in the final cell to persist model and result files.
+5. Download the generated model, baseline, and artifact ZIP files from the
+   final cells, then extract them into the local project.
 
 The training scripts download the dataset and the pretrained model on first
 use. Plan for substantial disk, network, RAM, and GPU usage for full training.
 The notebook invokes the active Colab `python` executable from PATH so the
 training subprocess uses the same installed packages as the notebook kernel.
+If a runtime disconnects, resume from an available checkpoint with
+`--resume-from-checkpoint models/contextcheck_distilbert/checkpoints/<checkpoint>`.
 
 Colab note: after changing the runtime or installing dependencies for the first
 time, restart the runtime if Colab reports a NumPy binary incompatibility.

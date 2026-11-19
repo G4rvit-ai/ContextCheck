@@ -1,13 +1,11 @@
 """Visualize measured test results for the fine-tuned Transformer."""
 
-import json
-
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
 from src.labels import LABEL_NAMES
-from src.ui import inject_styles, render_sidebar
+from src.ui import inject_styles, load_saved_results, render_sidebar
 from src.utils import RESULTS_PATH
 
 st.set_page_config(page_title="Model Evaluation | ContextCheck", page_icon="📊", layout="wide")
@@ -22,7 +20,11 @@ if not RESULTS_PATH.is_file():
     )
     st.stop()
 
-results = json.loads(RESULTS_PATH.read_text(encoding="utf-8"))
+try:
+    results = load_saved_results()
+except RuntimeError as error:
+    st.error(str(error))
+    st.stop()
 result = results.get("transformer")
 if not result:
     st.warning("The saved results do not contain a Transformer evaluation yet.")

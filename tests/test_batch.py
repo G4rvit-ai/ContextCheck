@@ -48,3 +48,16 @@ def test_batch_rejects_incomplete_predictor_output():
     frame = pd.DataFrame({"premise": ["text"], "hypothesis": ["statement"]})
     with pytest.raises(RuntimeError, match="unexpected number"):
         batch_predict_dataframe(frame, IncompletePredictor())
+
+
+def test_batch_marks_all_invalid_rows_without_calling_predictor():
+    class UnexpectedPredictor:
+        def predict_many(self, pairs):
+            raise AssertionError("predictor should not be called")
+
+    frame = pd.DataFrame(
+        {"premise": [None, ""], "hypothesis": ["statement", ""]}
+    )
+    result = batch_predict_dataframe(frame, UnexpectedPredictor())
+    assert result["predicted_label"].tolist() == ["INVALID", "INVALID"]
+    assert (result["status"].str.startswith("Invalid:")).all()

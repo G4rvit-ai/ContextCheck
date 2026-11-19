@@ -55,9 +55,21 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output-dir", type=Path, default=Path("models/contextcheck_distilbert"))
     parser.add_argument(
+        "--resume-from-checkpoint",
+        type=Path,
+        default=None,
+        help="Resume Trainer state from a saved checkpoint directory.",
+    )
+    parser.add_argument(
         "--results", type=Path, default=Path("artifacts/evaluation_results.json")
     )
     args = parser.parse_args()
+
+    if args.resume_from_checkpoint is not None and not args.resume_from_checkpoint.is_dir():
+        parser.error(
+            f"resume checkpoint does not exist or is not a directory: "
+            f"{args.resume_from_checkpoint}"
+        )
 
     set_seed(args.seed)
     dataset, preprocessing_stats = load_snli()
@@ -131,7 +143,7 @@ def main():
         data_collator=DataCollatorWithPadding(tokenizer=tokenizer),
         compute_metrics=validation_metrics,
     )
-    trainer.train()
+    trainer.train(resume_from_checkpoint=str(args.resume_from_checkpoint) if args.resume_from_checkpoint else None)
     trainer.save_model(str(args.output_dir))
     tokenizer.save_pretrained(str(args.output_dir))
 
